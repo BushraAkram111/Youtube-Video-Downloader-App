@@ -1,6 +1,5 @@
 import streamlit as st
-from pytube import YouTube
-from pytube.exceptions import RegexMatchError, VideoUnavailable
+import yt_dlp
 
 # Set page title and favicon
 st.set_page_config(
@@ -74,22 +73,15 @@ if not auto_resolution:
 # Button to trigger the download
 if st.button("Download"):
     if url:
+        ydl_opts = {
+            'format': 'best' if auto_resolution else f'bestvideo[height<={resolution[:-1]}]+bestaudio/best',
+            'outtmpl': '%(title)s.%(ext)s',
+            'noplaylist': True
+        }
         try:
-            yt = YouTube(url)
-            if auto_resolution:
-                stream = yt.streams.get_highest_resolution()
-            else:
-                stream = yt.streams.filter(res=resolution, file_extension="mp4").first()
-
-            if stream:
-                stream.download()
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
                 st.success("Download successful!")
-            else:
-                st.error("No streams available for the selected resolution.")
-        except RegexMatchError:
-            st.error("An error occurred: Unable to extract video information.")
-        except VideoUnavailable:
-            st.error("The video is unavailable. Please check the URL and try again.")
         except Exception as e:
             st.error(f"An error occurred: {e}")
     else:
