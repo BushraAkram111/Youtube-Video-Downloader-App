@@ -1,5 +1,5 @@
 import streamlit as st
-import yt_dlp
+import youtube_dl
 import logging
 
 # Set up logging
@@ -78,19 +78,18 @@ if not auto_resolution:
 # Function to handle the download
 def download_video(url, resolution, auto_resolution):
     try:
-        # Define the download options
         ydl_opts = {
             'format': 'best' if auto_resolution else f'bestvideo[height<={resolution[:-1]}]+bestaudio/best',
             'outtmpl': '%(title)s.%(ext)s',
             'noplaylist': True,
-            'progress_hooks': [lambda d: st.progress(d['downloaded_bytes'] / d['total_bytes'] * 100) if 'total_bytes' in d else None],
-            'quiet': True  # Suppresses the default output from yt-dlp
+            'quiet': True  # Suppresses the default output from youtube_dl
         }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             st.write("Downloading...")
             ydl.download([url])
             st.success("Download successful!")
-    except yt_dlp.utils.DownloadError as e:
+    except youtube_dl.DownloadError as e:
         st.error(f"An error occurred during download: {e}")
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
