@@ -1,5 +1,7 @@
 import streamlit as st
 import yt_dlp
+import logging
+import os
 
 # Set page title and favicon
 st.set_page_config(
@@ -89,6 +91,7 @@ def download_video(url, resolution, auto_resolution):
         st.error(f"An error occurred during download: {e}")
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
+        logging.error("An unexpected error occurred: %s", e)
 
 # Button to trigger the download
 if st.button("Download"):
