@@ -1,5 +1,5 @@
 import streamlit as st
-import youtube_dl
+import pafy
 import logging
 
 # Set up logging
@@ -20,19 +20,10 @@ url = st.text_input("Enter the URL of the YouTube video", key="url")
 # Function to handle the download
 def download_video(url):
     try:
-        ydl_opts = {
-            'format': 'best',
-            'outtmpl': '%(title)s.%(ext)s',
-            'noplaylist': True,
-            'quiet': True
-        }
-
-        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            st.write("Downloading...")
-            ydl.download([url])
-            st.success("Download successful!")
-    except youtube_dl.DownloadError as e:
-        st.error(f"An error occurred during download: {e}")
+        video = pafy.new(url)
+        best = video.getbest()
+        best.download(filepath=f"{video.title}.{best.extension}")
+        st.success("Download successful!")
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
         logging.error("An unexpected error occurred: %s", e)
