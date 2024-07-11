@@ -1,10 +1,6 @@
 import streamlit as st
 from pytube import YouTube
-from pytube.exceptions import RegexMatchError, VideoUnavailable
-import logging
-
-# Set up logging
-logging.basicConfig(level=logging.DEBUG, filename="app.log", filemode="a", format="%(asctime)s - %(levelname)s - %(message)s")
+from pytube.exceptions import RegexMatchError, VideoUnavailable, PytubeError
 
 # Set page title and favicon
 st.set_page_config(
@@ -75,33 +71,28 @@ resolution_options = ["144p", "240p", "360p", "480p", "720p", "1080p"]
 if not auto_resolution:
     resolution = st.selectbox("Select Video Resolution", resolution_options)
 
-# Function to handle the download
-def download_video(url, auto_resolution, resolution=None):
-    try:
-        yt = YouTube(url)
-        if auto_resolution:
-            stream = yt.streams.get_highest_resolution()
-        else:
-            stream = yt.streams.filter(res=resolution, file_extension="mp4").first()
-
-        if stream:
-            stream.download(output_path='downloads')  # Specify the output directory
-            st.success("Download successful!")
-        else:
-            st.error("No streams available for the selected resolution.")
-    except RegexMatchError:
-        st.error("An error occurred: Unable to extract video information.")
-        logging.error("RegexMatchError: Unable to extract video information for URL %s", url)
-    except VideoUnavailable:
-        st.error("The video is unavailable. Please check the URL and try again.")
-        logging.error("VideoUnavailable: The video is unavailable for URL %s", url)
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-        logging.error("An unexpected error occurred: %s", e)
-
 # Button to trigger the download
 if st.button("Download"):
     if url:
-        download_video(url, auto_resolution, resolution)
+        try:
+            yt = YouTube(url)
+            if auto_resolution:
+                stream = yt.streams.get_highest_resolution()
+            else:
+                stream = yt.streams.filter(res=resolution, file_extension="mp4").first()
+
+            if stream:
+                download_path = stream.download()
+                st.success(f"Download successful File saved at: {download_path}")
+            else:
+                st.error("No streams available for the selected resolution.")
+        except RegexMatchError:
+            st.error("An error occurred: Unable to extract video information. Please check the URL and try again.")
+        except VideoUnavailable:
+            st.error("The video is unavailable. Please check the URL and try again.")
+        except PytubeError as e:
+            st.error(f"An error occurred: {e}")
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {e}")
     else:
         st.warning("Please enter a valid YouTube URL")
