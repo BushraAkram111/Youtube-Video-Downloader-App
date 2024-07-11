@@ -6,4 +6,3 @@ streamlit
 yt-dlp
 pytube3
 pafy
-pip install --upgrade pytube
