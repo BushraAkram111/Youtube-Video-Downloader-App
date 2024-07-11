@@ -1,4 +1,5 @@
 streamlit
+youtube_dl
 pytube
 git+https://github.com/pytube/pytube
 streamlit
