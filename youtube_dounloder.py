@@ -85,7 +85,7 @@ def download_video(url, auto_resolution, resolution=None):
             stream = yt.streams.filter(res=resolution, file_extension="mp4").first()
 
         if stream:
-            stream.download()
+            stream.download(output_path='downloads')  # Specify the output directory
             st.success("Download successful!")
         else:
             st.error("No streams available for the selected resolution.")
