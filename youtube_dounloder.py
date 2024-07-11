@@ -1,5 +1,6 @@
 import streamlit as st
 import yt_dlp
+import os
 
 # Set page title and favicon
 st.set_page_config(
@@ -73,16 +74,21 @@ if not auto_resolution:
 # Button to trigger the download
 if st.button("Download"):
     if url:
+        # Define the download options
         ydl_opts = {
             'format': 'best' if auto_resolution else f'bestvideo[height<={resolution[:-1]}]+bestaudio/best',
             'outtmpl': '%(title)s.%(ext)s',
-            'noplaylist': True
+            'noplaylist': True,
+            'progress_hooks': [lambda d: st.progress(d['total_bytes'] / d['total_bytes'] * 100)],
         }
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                st.write("Downloading...")
                 ydl.download([url])
                 st.success("Download successful!")
+        except yt_dlp.utils.DownloadError as e:
+            st.error(f"An error occurred during download: {e}")
         except Exception as e:
-            st.error(f"An error occurred: {e}")
+            st.error(f"An unexpected error occurred: {e}")
     else:
         st.warning("Please enter a valid YouTube URL")
