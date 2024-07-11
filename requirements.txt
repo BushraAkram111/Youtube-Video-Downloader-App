@@ -1,3 +1,5 @@
 streamlit
 pytube
 git+https://github.com/pytube/pytube
+streamlit
+yt-dlp
