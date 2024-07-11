@@ -1,7 +1,9 @@
 import streamlit as st
 import yt_dlp
 import logging
-import os
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, filename="app.log", filemode="a", format="%(asctime)s - %(levelname)s - %(message)s")
 
 # Set page title and favicon
 st.set_page_config(
@@ -69,6 +71,7 @@ auto_resolution = st.checkbox("Automatically select best resolution")
 
 # Dropdown menu for selecting video resolution
 resolution_options = ["144p", "240p", "360p", "480p", "720p", "1080p"]
+resolution = None
 if not auto_resolution:
     resolution = st.selectbox("Select Video Resolution", resolution_options)
 
@@ -96,6 +99,9 @@ def download_video(url, resolution, auto_resolution):
 # Button to trigger the download
 if st.button("Download"):
     if url:
-        download_video(url, resolution, auto_resolution)
+        if auto_resolution or resolution:
+            download_video(url, resolution, auto_resolution)
+        else:
+            st.warning("Please select a video resolution.")
     else:
         st.warning("Please enter a valid YouTube URL")
