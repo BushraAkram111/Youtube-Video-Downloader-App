@@ -1,6 +1,7 @@
 import streamlit as st
 from pytube import YouTube
 from pytube.exceptions import RegexMatchError, VideoUnavailable, PytubeError
+!pip install --upgrade pytube
 
 # Set page title and favicon
 st.set_page_config(
