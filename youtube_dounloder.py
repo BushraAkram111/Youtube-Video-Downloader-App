@@ -1,6 +1,7 @@
 import streamlit as st
-import yt_dlp
+from pytube import YouTube
 import logging
+import os
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, filename="app.log", filemode="a", format="%(asctime)s - %(levelname)s - %(message)s")
@@ -78,20 +79,16 @@ if not auto_resolution:
 # Function to handle the download
 def download_video(url, resolution, auto_resolution):
     try:
-        # Define the download options
-        ydl_opts = {
-            'format': 'best' if auto_resolution else f'bestvideo[height<={resolution[:-1]}]+bestaudio/best',
-            'outtmpl': '%(title)s.%(ext)s',
-            'noplaylist': True,
-            'progress_hooks': [lambda d: st.progress(d['downloaded_bytes'] / d['total_bytes'] * 100)],
-            'quiet': True  # Suppresses the default output from yt-dlp
-        }
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            st.write("Downloading...")
-            ydl.download([url])
+        yt = YouTube(url)
+        if auto_resolution:
+            stream = yt.streams.get_highest_resolution()
+        else:
+            stream = yt.streams.filter(res=resolution, file_extension='mp4').first()
+        if stream:
+            stream.download()
             st.success("Download successful!")
-    except yt_dlp.utils.DownloadError as e:
-        st.error(f"An error occurred during download: {e}")
+        else:
+            st.error("No stream found for the selected resolution.")
     except Exception as e:
         st.error(f"An unexpected error occurred: {e}")
         logging.error("An unexpected error occurred: %s", e)
