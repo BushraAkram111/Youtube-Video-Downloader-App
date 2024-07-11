@@ -5,3 +5,4 @@ git+https://github.com/pytube/pytube
 streamlit
 yt-dlp
 pytube3
+pafy
